@@ -3,13 +3,37 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity"]
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider = "mysql"
+  url = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+  referentialIntegrity = "prisma"
 }
 
-model Example {
-  id String @id @default(cuid())
+
+// barebones models needed
+//Vote mostly ripped from Theo
+model Vote {
+id String @id @default(cuid())
+createdAt DateTime @default(now())
+version String 
+votedFor Champion @relation(name: "votesFor", fields: [votedForId], references: [id])
+votedForId String 
+votedAgainst Champion @relation(name: "votesAgainst", fields: [votedAgainstId], references: [id])
+votedAgainstId String
+}
+
+model Champion {
+  //id of champion
+  id String @id 
+  //name of champion
+  name String
+  //version the champ came from
+  version String
+  //if it was or was not voted for ripped from theo
+  VoteFor Vote[] @relation("votesFor")
+  VoteAgainst Vote[] @relation("votesAgainst")
 }
